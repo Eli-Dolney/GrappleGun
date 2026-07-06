@@ -1,28 +1,19 @@
 {
-  "name": "LTW_MorphSystem",
+  "name": "LTW_GrappleGun",
   "tree": {
     "$className": "DataModel",
     "ReplicatedStorage": {
-      "LTW_MorphSystem": {
-        "$path": "src/ReplicatedStorage/LTW_MorphSystem"
-      },
       "LTW_GrappleSystem": {
         "$path": "src/ReplicatedStorage/LTW_GrappleSystem"
       }
     },
     "ServerScriptService": {
-      "LTW_MorphSystemServer": {
-        "$path": "src/ServerScriptService/LTW_MorphSystemServer"
-      },
       "LTW_GrappleSystemServer": {
         "$path": "src/ServerScriptService/LTW_GrappleSystemServer"
       }
     },
     "StarterPlayer": {
       "StarterPlayerScripts": {
-        "LTW_MorphSystemClient": {
-          "$path": "src/StarterPlayer/StarterPlayerScripts/LTW_MorphSystemClient"
-        },
         "LTW_GrappleSystemClient": {
           "$path": "src/StarterPlayer/StarterPlayerScripts/LTW_GrappleSystemClient"
         }

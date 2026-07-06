@@ -1,39 +1,54 @@
-# LTW Morph System
+# Wrist Grapple
 
-A reusable Roblox morph framework built for Rojo projects and easy GitHub reuse.
+A standalone Rojo building block for a Roblox wrist grappling hook.
 
-## Included in v1
+## What It Does
 
-- Center-left morph icon with a polished in-game menu
-- Data-driven morph registry
-- `Dragon` morph with flight
-- `Goblin` morph with faster ground movement
-- Reset back to `Human`
+- Spawns pickup pads in the map
+- Gives players a `Wrist Grapple` tool with 10 uses
+- Removes the pickup version when uses hit 0
+- Grapples to normal map geometry: trees, builds, cliffs, floors, and walls
+- Enforces a server-side max range
+- Uses server-authoritative movement so the grapple cannot be trusted only from the client
+- Includes a placeholder wrist-mounted model that can be replaced later
 
-## Project layout
+## Rojo Layout
 
-- `src/ReplicatedStorage/LTW_MorphSystem`: shared modules and morph definitions
-- `src/ServerScriptService/LTW_MorphSystemServer`: server bootstrap and morph application logic
-- `src/StarterPlayer/StarterPlayerScripts/LTW_MorphSystemClient`: client UI and flight controller
-
-## Add a new morph
-
-1. Copy the shape from `MorphButtonTemplate.lua`
-2. Add the new entry to `MorphDefinitions.lua`
-3. Give it movement, abilities, card text, and appearance settings
-4. Reuse existing cosmetics or add a new cosmetic builder in `AppearanceService.lua`
-
-The registry and UI will pick it up automatically.
+- `src/ReplicatedStorage/LTW_GrappleSystem`: shared config
+- `src/ServerScriptService/LTW_GrappleSystemServer`: pickup, tool, validation, and physics
+- `src/StarterPlayer/StarterPlayerScripts/LTW_GrappleSystemClient`: input, HUD, aiming, and beam preview
 
 ## Controls
 
-- Open morph menu: click the left-side button or press `M`
-- Toggle flight: `F`
-- Fly up: `Space` or `E`
-- Fly down: `Q`
+- Equip `Wrist Grapple`
+- Click to grapple
+- Press `E` to grapple
+- Mobile players get a `GRAPPLE` button
 
-## Notes
+## Config
 
-- This v1 stays on the standard humanoid character for simplicity.
-- Flight is implemented as a shared client ability, not dragon-only hardcoded behavior.
-- The system reapplies the active morph after respawn.
+Edit `src/ReplicatedStorage/LTW_GrappleSystem/Shared/GrappleConfig.lua`.
+
+Useful values:
+
+- `PickupUses`: default `10`
+- `MaxRange`: default `300`
+- `CooldownSeconds`: default `0.55`
+- `PullSpeed`: default `172`
+- `ShopEnabled`: default `false`
+- `GamePassId`: set later when adding the Robux infinite-use version
+
+## Placing Pickups
+
+The system creates one fallback pickup near the map spawn.
+
+For custom pickup spots:
+
+1. In Workspace, create a folder named `LTW_GrapplePickupSpawns`
+2. Add parts where pickups should appear
+3. The parts can be transparent markers
+4. Restart playtest or reconnect Rojo
+
+## Project Hygiene
+
+This repo is intentionally just the grapple system. Keep each new idea in its own Rojo project/repo when possible, then copy finished systems into game projects as building blocks.

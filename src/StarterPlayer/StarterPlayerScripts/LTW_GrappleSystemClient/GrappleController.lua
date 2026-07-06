@@ -17,6 +17,7 @@ local hudGui
 local statusLabel
 local shopButton
 local mobileFireButton
+local rangeLabel
 local lastLocalFireAt = 0
 
 local function getCharacter()
@@ -126,14 +127,17 @@ local function updateHud()
 
 	local hasTool = playerHasGrapple()
 	statusLabel.Visible = hasTool
+	rangeLabel.Visible = hasTool
 	mobileFireButton.Visible = hasTool and UserInputService.TouchEnabled
-	shopButton.Visible = not currentState.hasPermanent
+	shopButton.Visible = config.ShopEnabled == true and not currentState.hasPermanent
 
 	if currentState.isInfinite then
 		statusLabel.Text = "Grapple: Infinite"
 	elseif hasTool then
 		statusLabel.Text = ("Grapple: %d uses"):format(currentState.uses or 0)
 	end
+
+	rangeLabel.Text = ("Max range: %d studs"):format(currentState.maxRange or config.MaxRange)
 end
 
 local function fireGrapple()
@@ -201,6 +205,17 @@ local function createHud()
 	local labelCorner = Instance.new("UICorner")
 	labelCorner.CornerRadius = UDim.new(0, 8)
 	labelCorner.Parent = statusLabel
+
+	rangeLabel = Instance.new("TextLabel")
+	rangeLabel.BackgroundTransparency = 1
+	rangeLabel.Position = UDim2.new(1, -220, 0, 56)
+	rangeLabel.Size = UDim2.new(0, 200, 0, 22)
+	rangeLabel.Font = Enum.Font.GothamMedium
+	rangeLabel.TextColor3 = Color3.fromRGB(210, 224, 240)
+	rangeLabel.TextSize = 12
+	rangeLabel.TextXAlignment = Enum.TextXAlignment.Right
+	rangeLabel.Visible = false
+	rangeLabel.Parent = hudGui
 
 	shopButton = createButton(hudGui, "Buy Infinite Grapple", UDim2.new(0, 176, 0, 38), UDim2.new(1, -196, 0, 64))
 	shopButton.Activated:Connect(function()
