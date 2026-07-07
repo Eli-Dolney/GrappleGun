@@ -80,6 +80,7 @@ end
 
 function GrappleService:Start()
 	self:CreateRemotes()
+	self:CreateTestArena()
 	self:CreateFallbackPickupSpawn()
 	self:CreatePickupPads()
 
@@ -115,6 +116,11 @@ function GrappleService:CreateRemotes()
 	requestGrapple.Name = self._config.RequestGrappleRemote
 	requestGrapple.Parent = remoteFolder
 	self._requestGrapple = requestGrapple
+
+	local grappleFired = Instance.new("RemoteEvent")
+	grappleFired.Name = self._config.GrappleFiredRemote
+	grappleFired.Parent = remoteFolder
+	self._grappleFired = grappleFired
 
 	local getState = Instance.new("RemoteFunction")
 	getState.Name = self._config.GetGrappleStateRemote
@@ -271,6 +277,97 @@ function GrappleService:GivePermanentTool(player)
 	end
 
 	self:CreateTool(PERMANENT_TOOL_TYPE, 0).Parent = backpack
+end
+
+function GrappleService:CreateArenaPart(parent, name, size, cframe, color, material)
+	local part = Instance.new("Part")
+	part.Name = name
+	part.Size = size
+	part.CFrame = cframe
+	part.Color = color
+	part.Material = material
+	part.Anchored = true
+	part.Parent = parent
+
+	return part
+end
+
+function GrappleService:CreateTree(parent, name, position, height)
+	local model = Instance.new("Model")
+	model.Name = name
+	model.Parent = parent
+
+	local trunkHeight = height
+	local trunk = self:CreateArenaPart(
+		model,
+		"Trunk",
+		Vector3.new(3.5, trunkHeight, 3.5),
+		CFrame.new(position + Vector3.new(0, trunkHeight / 2, 0)),
+		Color3.fromRGB(111, 73, 45),
+		Enum.Material.Wood
+	)
+
+	local canopy = self:CreateArenaPart(
+		model,
+		"Canopy",
+		Vector3.new(12, 10, 12),
+		CFrame.new(position + Vector3.new(0, trunkHeight + 4, 0)),
+		Color3.fromRGB(41, 126, 73),
+		Enum.Material.Grass
+	)
+
+	model.PrimaryPart = trunk
+
+	return model, canopy
+end
+
+function GrappleService:CreateTestArena()
+	if self._config.TestArenaEnabled ~= true then
+		return
+	end
+
+	if Workspace:FindFirstChild(self._config.TestArenaFolderName) then
+		return
+	end
+
+	local arena = Instance.new("Folder")
+	arena.Name = self._config.TestArenaFolderName
+	arena.Parent = Workspace
+
+	local floorColor = Color3.fromRGB(78, 88, 102)
+	self:CreateArenaPart(arena, "GrappleTestFloor", Vector3.new(210, 1, 170), CFrame.new(0, -0.5, -18), floorColor, Enum.Material.Concrete)
+
+	local spawnPad = self:CreateArenaPart(arena, "StartPad", Vector3.new(16, 1.2, 16), CFrame.new(0, 0.2, 0), Color3.fromRGB(226, 229, 237), Enum.Material.SmoothPlastic)
+	spawnPad.TopSurface = Enum.SurfaceType.Smooth
+
+	local lowWall = self:CreateArenaPart(arena, "LowPracticeWall", Vector3.new(48, 12, 4), CFrame.new(-18, 6, -44), Color3.fromRGB(132, 139, 150), Enum.Material.Brick)
+	lowWall.TopSurface = Enum.SurfaceType.Smooth
+
+	self:CreateArenaPart(arena, "SmallBuilding", Vector3.new(24, 34, 24), CFrame.new(42, 17, -62), Color3.fromRGB(96, 105, 120), Enum.Material.Concrete)
+	self:CreateArenaPart(arena, "SmallBuildingRoofTarget", Vector3.new(16, 2, 16), CFrame.new(42, 35, -62), Color3.fromRGB(52, 198, 255), Enum.Material.Metal)
+	self:CreateArenaPart(arena, "TallBuilding", Vector3.new(30, 58, 30), CFrame.new(78, 29, 12), Color3.fromRGB(70, 78, 92), Enum.Material.Concrete)
+	self:CreateArenaPart(arena, "TallBuildingRoofTarget", Vector3.new(18, 2, 18), CFrame.new(78, 59, 12), Color3.fromRGB(255, 183, 72), Enum.Material.Metal)
+	self:CreateArenaPart(arena, "SideBuilding", Vector3.new(22, 28, 34), CFrame.new(-68, 14, 22), Color3.fromRGB(88, 94, 105), Enum.Material.Concrete)
+
+	self:CreateArenaPart(arena, "GroundTraversalTarget", Vector3.new(18, 1, 18), CFrame.new(-44, 0.05, -78), Color3.fromRGB(52, 198, 255), Enum.Material.Neon)
+	self:CreateArenaPart(arena, "Ramp", Vector3.new(30, 2, 24), CFrame.new(-8, 5, -86) * CFrame.Angles(math.rad(-18), 0, 0), Color3.fromRGB(119, 128, 143), Enum.Material.Metal)
+
+	self:CreateTree(arena, "OakGrappleTree", Vector3.new(-44, 0, 48), 30)
+	self:CreateTree(arena, "PineGrappleTree", Vector3.new(-12, 0, 72), 42)
+	self:CreateTree(arena, "FarTree", Vector3.new(36, 0, 74), 36)
+
+	local spawnFolder = Instance.new("Folder")
+	spawnFolder.Name = self._config.PickupSpawnFolderName
+	spawnFolder.Parent = Workspace
+
+	local pickupSpawn = Instance.new("Part")
+	pickupSpawn.Name = "TestArenaPickupSpawn"
+	pickupSpawn.Size = Vector3.new(4, 1, 4)
+	pickupSpawn.CFrame = CFrame.new(0, 1.8, -10)
+	pickupSpawn.Transparency = 1
+	pickupSpawn.Anchored = true
+	pickupSpawn.CanCollide = false
+	pickupSpawn.Parent = spawnFolder
 end
 
 function GrappleService:CreateFallbackPickupSpawn()
@@ -450,6 +547,7 @@ function GrappleService:HandleGrappleRequest(player, targetPosition)
 
 	self._lastGrappleAt[player.UserId] = now
 	self:ConsumeUse(player)
+	self._grappleFired:FireAllClients(player, result.Position)
 	self:PullCharacter(character, rootPart, result.Position)
 end
 
@@ -467,6 +565,8 @@ function GrappleService:PullCharacter(character, rootPart, targetPosition)
 	if humanoid then
 		humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
 	end
+
+	rootPart.AssemblyLinearVelocity = Vector3.new(rootPart.AssemblyLinearVelocity.X, math.max(rootPart.AssemblyLinearVelocity.Y, self._config.UpwardBoost), rootPart.AssemblyLinearVelocity.Z)
 
 	local attachment = Instance.new("Attachment")
 	attachment.Name = "LTW_GrappleAttachment"
@@ -498,7 +598,9 @@ function GrappleService:PullCharacter(character, rootPart, targetPosition)
 
 		local direction = offset.Unit
 		local speedScale = math.clamp(distance / 70, 0.45, 1)
-		local upwardBoost = direction.Y < -0.2 and self._config.UpwardBoost * 0.35 or self._config.UpwardBoost
+		local arcTime = math.clamp((os.clock() - startedAt) / self._config.PullSeconds, 0, 1)
+		local arcBoost = math.sin(arcTime * math.pi) * self._config.UpwardBoost
+		local upwardBoost = direction.Y < -0.2 and arcBoost * 0.25 or arcBoost
 		linearVelocity.VectorVelocity = direction * (self._config.PullSpeed * speedScale) + Vector3.new(0, upwardBoost, 0)
 	end)
 

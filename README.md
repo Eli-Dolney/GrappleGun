@@ -9,8 +9,10 @@ A standalone Rojo building block for a Roblox wrist grappling hook.
 - Removes the pickup version when uses hit 0
 - Grapples to normal map geometry: trees, builds, cliffs, floors, and walls
 - Enforces a server-side max range
+- Shows the tether line only after the server accepts the grapple and spends a use
 - Uses server-authoritative movement so the grapple cannot be trusted only from the client
 - Includes a placeholder wrist-mounted model that can be replaced later
+- Can generate a small test arena with trees, buildings, walls, a ramp, and ground targets
 
 ## Rojo Layout
 
@@ -35,8 +37,22 @@ Useful values:
 - `MaxRange`: default `300`
 - `CooldownSeconds`: default `0.55`
 - `PullSpeed`: default `172`
+- `TestArenaEnabled`: default `true`
 - `ShopEnabled`: default `false`
 - `GamePassId`: set later when adding the Robux infinite-use version
+
+## Test Arena
+
+With `TestArenaEnabled = true`, the server creates a sample arena while the game is running. Press Play in Studio to test:
+
+- Tree trunks and canopies
+- Short and tall buildings
+- Roof targets
+- Ground traversal target
+- Low wall
+- Ramp
+
+The arena is named `LTW_GrappleTestArena` in Workspace during runtime.
 
 ## Placing Pickups
 

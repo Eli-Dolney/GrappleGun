@@ -1,6 +1,7 @@
 return {
 	RemoteFolderName = "LTW_GrappleSystem_Remotes",
 	RequestGrappleRemote = "RequestGrapple",
+	GrappleFiredRemote = "GrappleFired",
 	GetGrappleStateRemote = "GetGrappleState",
 	StateChangedRemote = "GrappleStateChanged",
 
@@ -20,4 +21,7 @@ return {
 	UpwardBoost = 34,
 	CloseEnoughDistance = 10,
 	RespawnSeconds = 16,
+
+	TestArenaEnabled = true,
+	TestArenaFolderName = "LTW_GrappleTestArena",
 }

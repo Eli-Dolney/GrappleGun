@@ -29,6 +29,11 @@ local function getRootPart()
 	return character and character:FindFirstChild("HumanoidRootPart")
 end
 
+local function getPlayerRootPart(player)
+	local character = player and player.Character
+	return character and character:FindFirstChild("HumanoidRootPart")
+end
+
 local function getEquippedGrappleTool()
 	local character = getCharacter()
 	if not character then
@@ -73,8 +78,8 @@ local function getAimPosition()
 	return result and result.Position or nil
 end
 
-local function flashTether(targetPosition)
-	local rootPart = getRootPart()
+local function flashTether(grapplePlayer, targetPosition)
+	local rootPart = getPlayerRootPart(grapplePlayer)
 	if not rootPart or not targetPosition then
 		return
 	end
@@ -103,11 +108,11 @@ local function flashTether(targetPosition)
 	beam.Color = ColorSequence.new(Color3.fromRGB(255, 219, 99), Color3.fromRGB(52, 198, 255))
 	beam.FaceCamera = true
 	beam.LightEmission = 0.85
-	beam.Width0 = 0.16
-	beam.Width1 = 0.05
+	beam.Width0 = 0.2
+	beam.Width1 = 0.08
 	beam.Parent = rootPart
 
-	task.delay(0.22, function()
+	task.delay(0.65, function()
 		if beam.Parent then
 			beam:Destroy()
 		end
@@ -158,7 +163,6 @@ local function fireGrapple()
 
 	lastLocalFireAt = now
 	requestGrappleRemote:FireServer(targetPosition)
-	flashTether(targetPosition)
 end
 
 local function createButton(parent, text, size, position)
@@ -280,6 +284,13 @@ function GrappleController.Start(options)
 	options.stateChangedRemote.OnClientEvent:Connect(function(nextState)
 		currentState = nextState
 		updateHud()
+	end)
+
+	options.grappleFiredRemote.OnClientEvent:Connect(function(grapplePlayer, targetPosition)
+		if grapplePlayer == localPlayer then
+			lastLocalFireAt = os.clock()
+		end
+		flashTether(grapplePlayer, targetPosition)
 	end)
 
 	ContextActionService:BindAction(ACTION_GRAPPLE, function(_, inputState)
